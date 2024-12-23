@@ -21,15 +21,20 @@ func commandHelp(opts []string, g *internal.Game) error {
 	fmt.Println(`
 Welcome to the Pokedex!
 Usage:
+
 map: Displays a map of the current location
 mapb: Displays a map of the current location
 explore <location>: Explore the current location
+catch <pokemon>: Catch a Pokemon
+inspect <pokemon>: Inspect a Pokemon
+pokedex: Display the pokedex
 help: Displays a help message
 exit: Exit the Pokedex`)
 	return nil
 }
 
 func commandExit(opts []string, g *internal.Game) error {
+	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
@@ -58,6 +63,9 @@ func commandMapB(opts []string, g *internal.Game) error {
 }
 
 func commandExplore(opts []string, g *internal.Game) error {
+	if len(opts) == 0 {
+		return errors.New("No location provided")
+	}
 	idOrName := opts[0]
 	log.Println("Exploring location " + idOrName)
 	areaData, err := g.GetLocationArea(idOrName)
@@ -72,6 +80,9 @@ func commandExplore(opts []string, g *internal.Game) error {
 }
 
 func commandCatch(opts []string, g *internal.Game) error {
+	if len(opts) == 0 {
+		return errors.New("No Pokemon provided")
+	}
 	p, err := internal.RequestPokemon(opts[0])
 	if err != nil {
 		return errors.New("Pokemon not found: " + err.Error())
@@ -86,6 +97,9 @@ func commandCatch(opts []string, g *internal.Game) error {
 }
 
 func commandInspect(opts []string, g *internal.Game) error {
+	if len(opts) == 0 {
+		return errors.New("No Pokemon provided")
+	}
 	idOrName := opts[0]
 	p, err := g.GetPokemon(idOrName)
 
@@ -160,15 +174,20 @@ var commands = map[string]cliCommand{
 
 func main() {
 	g := internal.NewGame()
+	reader := bufio.NewReader(os.Stdin)
 	for {
-		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Print("pokedex> ")
-		scanner.Scan()
-		cmdLine := scanner.Text()
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error or EOF: %v\n", err)
+			break
+		}
+		cmdLine := strings.TrimSpace(line)
 		cmdArray := strings.Split(cmdLine, " ")
 		c, exists := commands[cmdArray[0]]
 		if !exists {
-			fmt.Println("Command not found")
+			fmt.Println("Command not found: " + cmdArray[0])
+			os.Exit(1)
 		} else {
 			err := c.callback(cmdArray[1:], g)
 			if err != nil {
