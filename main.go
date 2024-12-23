@@ -6,10 +6,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/edgarmueller/go-pokedex/internal"
 )
+
+func cleanInput(text string) []string {
+	re := regexp.MustCompile(`\S+`)
+	tokens := re.FindAllString(strings.TrimSpace(text), -1)
+	return tokens
+}
 
 type cliCommand struct {
 	name        string
@@ -182,8 +189,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error or EOF: %v\n", err)
 			break
 		}
-		cmdLine := strings.TrimSpace(line)
-		cmdArray := strings.Split(cmdLine, " ")
+		cmdArray := cleanInput(line)
 		c, exists := commands[cmdArray[0]]
 		if !exists {
 			fmt.Println("Command not found: " + cmdArray[0])
