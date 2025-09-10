@@ -27,7 +27,7 @@ func NewGame() *Game {
 	}
 }
 
-func (gs *Game) GetNextLocationAreas() ([]structs.Result, error) {
+func (gs *Game) MoveToNextLocationAreas() ([]structs.Result, error) {
 	gs.currentPage += 1
 	locations, err := RequestLocationAreas(gs.currentPage, gs.cache)
 
@@ -38,7 +38,7 @@ func (gs *Game) GetNextLocationAreas() ([]structs.Result, error) {
 	return locations, nil
 }
 
-func (gs *Game) GetPrevLocationAreas() ([]structs.Result, error) {
+func (gs *Game) MoveToPrevLocationAreas() ([]structs.Result, error) {
 	gs.currentPage -= 1
 	if gs.currentPage < 0 {
 		gs.currentPage = 1
@@ -90,9 +90,9 @@ func (g *Game) AttemptCatch(p Pokemon) bool {
 		// Add the Pokemon to the list of catched Pokemon
 		g.Pokedex[p.Name] = p
 		return true
-	} else {
-		return false
 	}
+
+	return false
 }
 
 func (g *Game) GetPokemon(idOrName string) (Pokemon, error) {
