@@ -1,4 +1,4 @@
-# go-crawler 
+# go-pokedex 
 
 boot.dev project. 
 
